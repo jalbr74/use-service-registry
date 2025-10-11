@@ -1,0 +1,30 @@
+{
+    "name": "use-service-registry",
+    "version": "1.0.0",
+    "author": "James Albright <jalbr74@gmail.com>",
+    "license": "MIT",
+    "description": "Provides a bare minimum implementation of a service registry for React.",
+    "keywords": ["react", "service registry"],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jalbr74/use-service-registry.git"
+    },
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
+    "scripts": {
+        "clean": "rimraf dist",
+        "build": "npx tsc"
+    },
+    "peerDependencies": {
+        "react": ">=16.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^16.0",
+        "@types/react-dom": "^16.0",
+        "rimraf": "^6.0.1",
+        "typescript": "^5.5.4"
+    }
+}
