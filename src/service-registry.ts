@@ -1,5 +1,3 @@
-// TODO: publish this to npm as a standalone package: use-service-registry
-
 import { createContext, createElement, type ReactNode, useContext } from "react";
 
 export type Ctor<T> = new (...args: never[]) => T;
@@ -8,8 +6,41 @@ export interface Disposable {
     dispose(): void;
 }
 
+export interface ServiceRegistryProps {
+    provide: Ctor<unknown>[];
+}
+
+export class ServiceObjectPlaceholder {
+    ctor: Ctor<unknown>;
+
+    constructor(ctor: Ctor<unknown>) {
+        this.ctor = ctor;
+    }
+}
+
 export class ServiceRegistry {
     private registry = new Map<Ctor<unknown>, unknown>();
+
+    constructor(props?: ServiceRegistryProps) {
+        if (props?.provide) {
+            // First, create all instances without resolving any dependencies.
+            for (const ctor of props.provide) {
+                const instance = new ctor();
+                this.add(ctor, instance);
+            }
+
+            // Now that all instances are created, we can resolve any dependencies that get injected.
+            for (const instance of this.registry.values()) {
+                for (const key of Object.keys(instance as object)) {
+                    const value = (instance as any)[key];
+
+                    if (value instanceof ServiceObjectPlaceholder) {
+                        (instance as any)[key] = this.get((value as ServiceObjectPlaceholder).ctor);
+                    }
+                }
+            }
+        }
+    };
 
     add<T>(ctor: Ctor<T>, value: T) {
         this.registry.set(ctor, value);
@@ -28,6 +59,11 @@ export class ServiceRegistry {
 
         this.registry.clear();
     }
+}
+
+export function inject<T>(ctor: Ctor<T>): T {
+    // This returns a placeholder object during service construction, which gets replaced by the actual instance at runtime.
+    return new ServiceObjectPlaceholder(ctor) as unknown as T;
 }
 
 const ServiceRegistryContext = createContext<ServiceRegistry | null>(null);
