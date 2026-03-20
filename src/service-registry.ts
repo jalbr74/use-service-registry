@@ -36,7 +36,7 @@ export class ServiceRegistry {
         }
     };
 
-    resolveInjections(instance: unknown) {
+    resolveInjections<T>(instance: T): T {
         for (const key of Object.keys(instance as object)) {
             const value = (instance as any)[key];
 
@@ -44,6 +44,8 @@ export class ServiceRegistry {
                 (instance as any)[key] = this.get((value as ServiceObjectPlaceholder).ctor);
             }
         }
+
+        return instance;
     }
 
     add<T>(ctor: Ctor<T>, value: T) {
