@@ -31,16 +31,20 @@ export class ServiceRegistry {
 
             // Now that all instances are created, we can resolve any dependencies that get injected.
             for (const instance of this.registry.values()) {
-                for (const key of Object.keys(instance as object)) {
-                    const value = (instance as any)[key];
-
-                    if (value instanceof ServiceObjectPlaceholder) {
-                        (instance as any)[key] = this.get((value as ServiceObjectPlaceholder).ctor);
-                    }
-                }
+                this.resolveInjections(instance);
             }
         }
     };
+
+    resolveInjections(instance: unknown) {
+        for (const key of Object.keys(instance as object)) {
+            const value = (instance as any)[key];
+
+            if (value instanceof ServiceObjectPlaceholder) {
+                (instance as any)[key] = this.get((value as ServiceObjectPlaceholder).ctor);
+            }
+        }
+    }
 
     add<T>(ctor: Ctor<T>, value: T) {
         this.registry.set(ctor, value);
