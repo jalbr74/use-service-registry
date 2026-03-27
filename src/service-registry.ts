@@ -1,6 +1,7 @@
 import { createContext, createElement, type ReactNode, useContext } from "react";
 
 export type Ctor<T> = new (...args: never[]) => T;
+export type NoArgConstructor<T> = new () => T;
 
 export interface Disposable {
     dispose(): void;
@@ -31,12 +32,19 @@ export class ServiceRegistry {
 
             // Now that all instances are created, we can resolve any dependencies that get injected.
             for (const instance of this.registry.values()) {
-                this.resolveInjections(instance);
+                this.inject(instance);
             }
         }
     };
 
-    resolveInjections<T>(instance: T): T {
+    inject<T>(arg: NoArgConstructor<T>): T;
+    inject<T>(arg: T): T;
+    inject<T>(arg: T | NoArgConstructor<T>): T {
+        const instance =
+            typeof arg === "function"
+                ? new (arg as NoArgConstructor<T>)()
+                : arg;
+
         for (const key of Object.keys(instance as object)) {
             const value = (instance as any)[key];
 
