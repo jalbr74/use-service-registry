@@ -147,6 +147,6 @@ export function useServiceRegistry(): ServiceRegistry {
  *     const backendService = useService(BackendService);
  * </pre>
  */
-export function useService<T>(ctor: NoArgConstructor<T>): T {
-    return useServiceRegistry().get(ctor);
+export function useService<T>(registryKey: RegistryKey<T>): T {
+    return useServiceRegistry().get(registryKey);
 }
