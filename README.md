@@ -27,7 +27,7 @@ main.tsx:
 
 ```tsx
 const registry = new ServiceRegistry({
-    provide: [MessageService]
+    providers: [MessageService]
 });
 
 createRoot(document.getElementById('root')!).render(
@@ -56,12 +56,12 @@ export function App() {
 
 ## Dependency Injection
 
-A very simple dependency injection mechanism can be used if you have services that rely on each other. Just add all the services in the provide array of your ServiceRegistry. For example:
+A very simple dependency injection mechanism can be used if you have services that rely on each other. Just add all the services in the providers array of your ServiceRegistry. For example:
 
 main.tsx
 ```ts
 const registry = new ServiceRegistry({
-    provide: [BackendService, MessageService, NameService]
+    providers: [BackendService, MessageService, NameService]
 });
 ```
 
@@ -77,4 +77,59 @@ export class BackendService {
         return Promise.resolve(this.nameService.getName() + ': ' + this.messageService.getMessage());
     }
 }
+```
+
+## Service Providers
+
+You can also provide services using a provider object. This is useful if you have complex logic or want to register an instance of a service for an interface.
+
+### useValue
+
+```ts
+var messageServiceInstance = new MessageService("Hello World!");
+
+const registry = new ServiceRegistry({
+    providers: [
+        {
+            provide: MessageService,
+            useValue: messageServiceInstance
+        }
+    ]
+});
+```
+
+### useFactory
+
+```ts
+var messageServiceInstance = new MessageService("Hello World!");
+
+const registry = new ServiceRegistry({
+    providers: [
+        {
+            provide: MessageService,
+            useFactory: () => messageServiceInstance
+        }
+    ]
+});
+```
+
+### useClass
+
+If you have an interface and want to provide a class that implements that interface, you can use the `useClass` option. For example:
+
+```ts
+export interface INameService {
+    getName(): string;
+}
+
+export const INameServiceToken = createServiceToken<INameService>("INameService");
+
+const registry = new ServiceRegistry({
+    providers: [
+        {
+            provide: INameServiceToken,
+            useClass: FirstNameService
+        }
+    ]
+});
 ```
